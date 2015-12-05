@@ -63,6 +63,5 @@ let stables (a:automaton) n :formula =
   let b = List.filter (fun b -> b.[4] = 'D') a.regles in
   let f = List.fold_left (fun l x -> x::l) b c in
   let iter = Array.init (n*n) (fun k -> (k/n,k mod n)) in
-  List.flatten (Array.fold_left (fun l x -> (stable f x)::l) [] iter);
+  List.flatten (Array.fold_left (fun l x -> (stable f x a.voisinage)::l) [] iter);
 ;;
-
