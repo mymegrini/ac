@@ -32,3 +32,13 @@ let parse inc =
     let g = get_generation g 0 n in
     n,a,g
 ;;
+
+let rec answer s =
+  print_string(s);
+  let r = read_line () in
+    match r.[0] with
+      |'Y'|'y' -> true
+      |'N'|'n' -> false
+      |_ -> answer s
+;;
+

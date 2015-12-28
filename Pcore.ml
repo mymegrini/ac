@@ -32,6 +32,28 @@ let next_generation (a:automaton) (g:generation) :generation=
   gnext
 ;;
 
+  
+let show_generation (g:generation) =
+  let rec line = function
+    |0 -> print_string("*\n")
+    |n -> print_string("*---"); line(n-1)
+  in
+
+  print_string "\n";
+  let n = Array.length(g) in
+  for i=0 to n-1 do
+    line n;
+    for j=0 to n-1 do
+      print_string "| ";
+      print_char(g.(i).(j));
+      print_char ' '
+    done;
+    print_string "|\n";
+  done;
+  line n;
+  print_string "\n"
+;;
+
 let stables (a:automaton) n :formula =
   let var i j = ((i+n)mod n)*n+((j+n)mod n) in
   let complement a =
@@ -66,4 +88,5 @@ let stables (a:automaton) n :formula =
 
 let sleep s =
   let t = Sys.time() in
-  while Sys.time()<t+.s do () done;;
+  while Sys.time()<t+.s do () done
+;;
