@@ -63,3 +63,7 @@ let stables (a:automaton) n :formula =
   let iter = Array.init (n*n) (fun k -> (k/n,k mod n)) in
   List.flatten (Array.fold_left (fun l x -> (stable f x)::l) [] iter);
 ;;
+
+let sleep s =
+  let t = Sys.time() in
+  while Sys.time()<t+.s do () done;;
