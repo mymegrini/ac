@@ -1,7 +1,7 @@
 CC = ocamlfind ocamlc
 EXEC = celaut
 
-ML = Pcore.ml Pio.ml Pgraphics.ml celaut.ml
+ML = $(wildcard *.ml)
 CMO = $(patsubst %.ml, %.cmo, $(ML))
 CMI = $(patsubst %.ml, %.cmi, $(ML))
 
