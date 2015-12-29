@@ -6,7 +6,7 @@ let read file =
   in
   
   let cin = open_in file in
-  let list = List.rev (aux []) in
+  let list = List.rev (aux cin []) in
   close_in cin;  
   list
 ;;
@@ -14,7 +14,7 @@ let read file =
 let write file list =
   let rec aux cou = function
     |[] -> close_out cou
-    |s::t -> output_string(s^"\n");
+    |s::t -> output_string cou (s^"\n");
 	     aux cou t
   in
 
