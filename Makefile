@@ -16,6 +16,9 @@ celaut.cmi: celaut.ml
 %.cmi: %.mli
 	$(CC) $<
 
+%.cmi: %.ml
+	$(CC) -i $@ $<
+
 %.cmo: %.ml $(CMI)
 	$(CC) -c $<
 
