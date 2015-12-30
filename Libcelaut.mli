@@ -21,3 +21,5 @@ val show_generation : generation -> unit
 val next_generation : automaton * generation -> generation
 
 val stables : automaton int -> formula
+
+val flush : file -> automaton -> generation -> unit

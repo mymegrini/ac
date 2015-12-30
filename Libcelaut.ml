@@ -29,6 +29,7 @@ let maxstate = 255
     
 (* exponentiation *)
 let e x n =
+  
   let rec aux r x = function
   |0 -> r
   |1 -> r*x
@@ -41,11 +42,13 @@ let e x n =
 
 (* pausing execution *)
 let sleep s =
+  
   let t = Sys.time() in
   while Sys.time()<t+.s do () done
       
 (* parsing a file *)
 let parse (file:file) =
+  
   let line = ref 1 in
   
   let fail ()=
@@ -173,6 +176,7 @@ let parse (file:file) =
 
 (* printing a generation in standard output *)
 let show_generation (g:generation) =
+  
   let rec line = function
     |0 -> print_string("*\n")
     |n -> print_string("*---"); line(n-1)
@@ -199,10 +203,12 @@ let show_generation (g:generation) =
 
 (* generating next generation *)
 let seeku universe i j =
+  
   let n = Array.length universe in
   universe.((i+n) mod n).((j+n) mod n)
     
 let seekv compass ns rule i j =
+  
   let index =
     let k = ref(-1) in
     Array.iteri (fun n (a,b) -> if (!k = -1) && (a,b)=(i,j) then k := n+1) compass;
@@ -211,11 +217,13 @@ let seekv compass ns rule i j =
   (rule/(e ns index)) mod ns
 		       
 let vicinity compass ns seek i j =
+  
   let rule = ref 0 in
   Array.iteri (fun n (a,b) -> rule := ns*(!rule)+(seek (i+a) (j+b))) compass;
   !rule
    
-let next_generation (a:automaton) (g:generation) :generation=  
+let next_generation (a:automaton) (g:generation) :generation=
+  
   let usize = Array.length g.universe in
   let ns = g.maxstate+1 in
   let u = g.universe in
