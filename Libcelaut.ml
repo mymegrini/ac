@@ -1,4 +1,4 @@
-open IO
+(*open IO*)
   
 type state = int
 type generation = {
@@ -252,13 +252,13 @@ let stables (a:automaton) usize :formula =
   in
   
   let stable compass (i,j) =
-    Array.fold_left
-      (fun l rule -> if (rule mod 2)=a.rules.(rule)
-		     then (clause rule compass i j)::l
-		     else l
+    let l = ref [] in
+    Array.iteri
+      (fun rule state -> if (rule mod 2)<>state
+			 then l:=(clause rule compass i j)::(!l)
       )
-      []
-      (a.rules)
+      (a.rules);
+    !l
   in   
   
   let compass = a.vicinity in
