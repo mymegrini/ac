@@ -1,4 +1,4 @@
-(*open IO*)
+open IO
   
 type state = int
 type generation = {
@@ -107,7 +107,6 @@ let parse (file:file) =
 	|l::t when l="Generation" -> (l::t)
 	|l::r::t -> let rule = ref 0 in
 		    String.iter (fun c -> rule := ns*(!rule)+(getstate ns c)) l;
-		    print_char '\n';
 		    if ns>2
 		    then (incr(line);
 			  if String.length(r)>1 then fail()
@@ -273,3 +272,63 @@ let stables (a:automaton) usize :formula =
   let iter = Array.init (usize*usize) (fun k -> (k/usize,k mod usize)) in
   List.flatten (Array.fold_left (fun l x -> (stable compass x)::l) [] iter)
 	       
+
+(* saving into file *)
+let flush (file:file) (a:automaton) (g:generation) =
+  
+  let flushint lines n =
+    lines := (string_of_int n)::!lines
+  in
+
+  let flushvicinity compass lines =
+    Array.iter
+      (fun (i,j) -> lines:= ((string_of_int i)^","^(string_of_int j))::!lines)
+      compass
+  in
+  
+  let getchar ms = function
+    |0 when ms=1 -> 'D'
+    |1 when ms=1 -> 'A'
+    |i -> char_of_int i
+  in
+  
+  let rulestring rule state ms vsize =
+    let digit i =
+      (rule/(e (ms+1) (vsize-i-1))) mod (ms+1)
+    in
+    
+    (String.init vsize (fun i -> getchar ms (digit i)))
+    ^(if ms>1 then "\n"^string_of_int(state) else "")
+  in
+
+  let flushrules rules lines ms vsize =
+    Array.iteri
+      (fun rule state ->
+	if state>0 then lines:= (rulestring rule state ms vsize)::!lines)
+      rules
+  in
+
+  let getline ms line =
+    let usize = Array.length line in
+    String.init usize (fun i -> getchar ms (line.(i)))
+  in
+  
+  let flushgeneration universe ms lines =
+    Array.iter(fun line -> lines:= (getline ms line)::!lines) universe
+  in  
+
+  let lines = ref [] in
+  let n = Array.length(g.universe) in
+  let compass = a.vicinity in  
+  let ms = g.maxstate in
+  let rules = a.rules in
+  let vsize = Array.length(a.vicinity) in
+  let universe = g.universe in  
+  flushint lines n;
+  lines:= "Vicinity"::!lines;
+  flushvicinity compass lines;
+  lines:= "Rules"::!lines;
+  flushrules rules lines ms vsize;
+  lines:= "Generation"::!lines;
+  flushgeneration universe ms lines;
+  write file (List.rev !lines)
