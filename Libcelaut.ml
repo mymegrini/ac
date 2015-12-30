@@ -10,7 +10,7 @@ type automaton = {
     vicinity : compass;
     rules : state array;
   }
-type formula = int list list
+type formula = string list
 type file = string
   
 
@@ -188,11 +188,11 @@ let show_generation (g:generation) =
   let ms,u = g.maxstate,g.universe in
   print_string "\n";
   let n = Array.length(u) in
-  for i=0 to n-1 do
+  for i=1 to n do
     line n;
     for j=0 to n-1 do
       print_string "| ";
-      (try print_char(getchar ms (u.(i).(j))) with _ -> raise (Badcell (i,j)));
+      (try print_char(getchar ms (u.(n-i).(j))) with _ -> raise (Badcell ((n-i),j)));
       print_char ' '
     done;
     print_string "|\n";
@@ -254,7 +254,7 @@ let stables (a:automaton) usize :formula =
       (fun l (a,b) -> decr(vsize);
 		      (neg(i+a)(j+b)((rule/(e 2 !vsize)) mod 2))::l
       )
-      []
+      [0]
       compass      
   in
   
@@ -266,11 +266,16 @@ let stables (a:automaton) usize :formula =
       )
       (a.rules);
     !l
-  in   
+  in  
+  
+  let getformula f =
+    let f' = List.map (List.map string_of_int) f in
+    List.map (String.concat " ") f'
+  in
   
   let compass = a.vicinity in
   let iter = Array.init (usize*usize) (fun k -> (k/usize,k mod usize)) in
-  List.flatten (Array.fold_left (fun l x -> (stable compass x)::l) [] iter)
+  getformula(List.flatten (Array.fold_left (fun l x -> (stable compass x)::l) [] iter))
 	       
 
 (* saving into file *)
@@ -332,3 +337,10 @@ let flush (file:file) (a:automaton) (g:generation) =
   lines:= "Generation"::!lines;
   flushgeneration universe ms lines;
   write file (List.rev !lines)
+
+(* initialize minisat input file *)
+let inputsat (f:formula) n =      
+  let header = "p cnf "^string_of_int(n*n)^" "^string_of_int(List.length f) in
+  write "dimacs" (header::f)
+  
+
