@@ -1,14 +1,19 @@
 CC = ocamlfind ocamlc
 EXEC = celaut
+FILES = dimacs valuation minisat
 
 ML = $(wildcard *.ml)
 CMO = $(patsubst %.ml, %.cmo, $(ML))
 CMI = $(patsubst %.ml, %.cmi, $(ML))
 
-all: $(EXEC)
+all: cleanfiles files $(EXEC) clean
+
+files:
+	touch $(FILES)
+	chmod 777 $(FILES)
 
 $(EXEC): $(CMO)
-	$(CC) -o $@ $^
+	$(CC) -o $@ unix.cma $^
 
 celaut.cmi: celaut.ml
 	$(CC) -i celaut.ml
@@ -16,18 +21,14 @@ celaut.cmi: celaut.ml
 %.cmi: %.mli
 	$(CC) $<
 
-%.cmi: %.ml
-	$(CC) -i $@ $<
-
 %.cmo: %.ml $(CMI)
 	$(CC) -c $<
-
-Pgraphics.cmo: Pgraphics.ml $(CMI)
-	$(CC) -c Pgraphics.ml graphics.cma $1 $2
-
 
 clean:
 	rm -f $(CMO) $(CMI)
 
-mrproper: clean
+cleanfiles:
+	rm -f $(FILES)
+
+mrproper: clean cleanfiles
 	rm -f $(EXEC)

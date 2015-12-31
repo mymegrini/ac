@@ -9,7 +9,7 @@ type automaton = {
     rules : state array;
   }
 ;;
-type formula = int list list
+type formula = string list
 type file = string
   
 
@@ -26,3 +26,7 @@ val next_generation : automaton -> generation -> generation
 val stables : automaton -> int -> formula
 
 val flush : file -> automaton -> generation -> unit
+
+val minisat : automaton -> int -> generation option
+
+val show_stables : automaton -> int -> unit

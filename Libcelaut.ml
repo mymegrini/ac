@@ -1,5 +1,6 @@
 open IO
-  
+open Unix
+       
 type state = int
 type generation = {
     maxstate : state;
@@ -144,7 +145,7 @@ let parse (file:file) =
     {maxstate = ns-1; universe = u}
   in
   
-  let lines = ref(read file) in
+  let lines = ref(readlist file) in
   let n,l = parseint !lines in
   lines := l;
   let ms = ref 2 in
@@ -336,11 +337,44 @@ let flush (file:file) (a:automaton) (g:generation) =
   flushrules rules lines ms vsize;
   lines:= "Generation"::!lines;
   flushgeneration universe ms lines;
-  write file (List.rev !lines)
+  writelist file (List.rev !lines)
 
-(* initialize minisat input file *)
-let inputsat (f:formula) n =      
-  let header = "p cnf "^string_of_int(n*n)^" "^string_of_int(List.length f) in
-  write "dimacs" (header::f)
-  
+(* run minisat *)
+let initdimacs = ref true
+let initsize = ref (-1)
+let initautomaton = ref {vicinity = [||]; rules = [||];}
+		         
+let minisat a n =
+  if !initdimacs then (initsat (stables a n) n; initdimacs:= false);
 
+  let list_to_universe list n =
+    let u = Array.make_matrix n n 0 in
+    let rec aux = function
+      |[] -> u
+      |(k::l) when k>0 -> u.((k-1)/n).((k-1) mod n)<-1;
+			  aux l
+      |(k::l) -> aux l
+    in
+    aux list
+  in
+
+  let pid = fork () in
+  match pid with
+  |0 -> let output = Unix.openfile "minisat" [O_WRONLY;O_TRUNC;O_CREAT] 777 in
+	Unix.dup2 output stdout;
+	Unix.dup2 output stderr;
+	Unix.execvp "minisat" [|"minisat"; "-rnd-freq=1"; "dimacs"; "valuation"|]
+  |_ -> let _,_ = Unix.wait() in
+	let list = outputsat() in
+	if list = []
+	then None
+	else Some({maxstate = 1; universe = (list_to_universe list n);})
+
+let show_stables a n =
+  if (n<1)
+  then raise (Limits "Minimum universe size exceeded");
+  if !initsize<>n || !initautomaton<>a
+  then (initsize:= n; initautomaton:= a; initdimacs:= true);
+  match minisat a n with
+  |None -> initdimacs:= true; ()
+  |Some(g) -> show_generation g
