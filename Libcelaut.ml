@@ -40,12 +40,6 @@ let e x n =
 	else aux (r*x) (x*x) ((n-1)/2)
   in
   aux 1 x n
-
-(* pausing execution *)
-let sleep s =
-  
-  let t = Sys.time() in
-  while Sys.time()<t+.s do () done
       
 (* parsing a file *)
 let parse (file:file) =
@@ -167,11 +161,11 @@ let parse (file:file) =
   );
   if List.hd(!lines)<>"Rules" then fail();
   incr(line);
-  let r,l = parserules (!ms) (Array.length !compass) (List.tl !lines) in
+  let r,l = parserules (!ms+1) (Array.length !compass) (List.tl !lines) in
   lines := l;
   if List.hd(!lines)<>"Generation" then (print_string(List.hd(!lines));fail());
   incr(line);
-  let (g: generation) = parsegeneration (!ms) n (List.tl !lines) in
+  let (g: generation) = parsegeneration (!ms+1) n (List.tl !lines) in
   n,{vicinity = !compass; rules = r;}, g
 
 (* printing a generation in standard output *)
@@ -331,6 +325,8 @@ let flush (file:file) (a:automaton) (g:generation) =
   let vsize = Array.length(a.vicinity) in
   let universe = g.universe in  
   flushint lines n;
+  lines:= "States"::!lines;
+  flushint lines ms;
   lines:= "Vicinity"::!lines;
   flushvicinity compass lines;
   lines:= "Rules"::!lines;
